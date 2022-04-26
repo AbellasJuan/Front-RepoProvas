@@ -8,7 +8,7 @@ import { Container, Menu, PageTitle, StyledButton, Test, TestsBox } from '../com
 
 export default function Term(){
   const [tests, setTests] = useState(null);
-  const [teachers, setTeachers] = useState([]);
+  const [teachers, setTeachers] = useState(null);
 
   const navigate = useNavigate();
   const { auth } = useAuth();
@@ -67,6 +67,16 @@ export default function Term(){
    renderTeachers();} , [])
 
     return (
+       teachers === null ? 
+
+        <Container>
+          <PageTitle>
+            <h1>Carregando...</h1>
+          </PageTitle>
+        </Container> 
+        
+        : 
+       
         <Container>
           
           <PageTitle>

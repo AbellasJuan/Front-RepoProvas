@@ -9,7 +9,7 @@ import { Container, Menu, PageTitle, StyledButton, Test, TestsBox } from '../com
 export default function Term(){
 
   const [tests, setTests] = useState(null);
-  const [terms, setTerms] = useState([]);
+  const [terms, setTerms] = useState(null);
 
   const navigate = useNavigate();
   const { auth } = useAuth();
@@ -67,8 +67,18 @@ export default function Term(){
    renderTerms();} , [])
 
     return (
+
+      terms === null ? 
+
         <Container>
-          
+          <PageTitle>
+            <h1>Carregando...</h1>
+          </PageTitle>
+        </Container> 
+        
+        : 
+
+        <Container>
           <PageTitle>
             <h1>PROVAS POR PERÍODO</h1>
             <StyledButton onClick={()=>navigate('/teacher')}>Ver provas por PROFESSOR</StyledButton>
