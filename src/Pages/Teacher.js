@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import styled from "styled-components";
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import api from '../services/api';
 import Swal from 'sweetalert2';
+import { Container, Menu, PageTitle, StyledButton, Test, TestsBox } from '../components/TeachersTerms/index.js';
 
 
 export default function Term(){
-  const [tests, setTests] = useState([]);
+  const [tests, setTests] = useState(null);
   const [teachers, setTeachers] = useState([]);
 
   const navigate = useNavigate();
@@ -78,6 +78,7 @@ export default function Term(){
               <StyledButton key={index} onClick={() => renderTests(`${teacher.id}`)}>{teacher.name}</StyledButton>
             )}
           </Menu>
+          {tests === null && <Test>SELECIONE O PROFESSOR DESEJADO</Test>}
           {
           tests?.length === 0 ? <Test>NÃO HÁ PROVAS DESSE PROFESSOR</Test> :
 
@@ -86,7 +87,7 @@ export default function Term(){
             <TestsBox key={index}>
               <Test>
                 <p>{test.category.name}</p>
-                <p>{test.name}</p> 
+                <p>Tema: {test.name}</p> 
                 <p><a href={`${test.pdfUrl}`}> LINK DA PROVA </a></p>
                 <p>Disciplina: {test.teacherDiscipline.discipline.name}</p>
                 <p>Período: {test.teacherDiscipline.discipline.term.number}</p>
@@ -98,85 +99,3 @@ export default function Term(){
         </Container>
     );
 };
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: #072227;
-  width: 100vw;
-  height: 100vh;
-`
-const PageTitle = styled.div`
-  width: 100vw;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  h1{
-    font-family: Arial, Helvetica, sans-serif;
-    margin: 30px 0 30px 0;
-    font-size: 2em;
-    color: #AEFEFF;
-  }
-
-  button{
-    width: auto;
-    font-size: 15px;
-    margin-left: 20px;
-  }
-`
-
-const Menu = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5em;
-`
-
-const StyledButton = styled.button`
-  display: flex;
-  align-items: center;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 1em;
-  height: 4em;
-  background-color: #35858B;
-  border: 2px solid #AEFEFF;
-  border-radius: 15px;
-  color:#AEFEFF;
-
-  :hover{
-    cursor: pointer;
-  }
-`
-
-const TestsBox = styled.div`
-  display: flex;
-  justify-content: center;
-  width: 100vw;
-  position: relative;
-`
-
-const Test = styled.div`
-  width: 30em;
-  padding: 15px;
-  border: 2px solid #AEFEFF;
-  border-radius: 15px;
-  margin: 20px 0 10px 0;
-  background-color: #35858B;
-  text-align: center;
-  color:  #AEFEFF;
-  font-family: Arial, Helvetica, sans-serif;
-
-  p:first-child { 
-    font-weight: 700;
-    font-size: 1.5em;
-    color: #4FBDBA;
-  }
-
-  p, a{
-    font-family: Arial, Helvetica, sans-serif;
-    margin-top: 5px;
-    text-align: start;
-    color: #AEFEFF;
-  }
-`

@@ -40,7 +40,7 @@ export default function SignUp(){
         title: 'Sucesso!',
         text: 'O usuário foi cadastrado'
       })
-      navigate('/sign-in');
+      navigate('/');
     } catch (error) {
       let errorMessage = (String(error));
         if(errorMessage.includes(422)){
@@ -89,7 +89,7 @@ export default function SignUp(){
         />
         <Button type="submit">Cadastrar</Button>
             </Form>
-            <StyledLink to="/sign-in">Já tem uma conta? Entre agora!</StyledLink>
+            <StyledLink to="/">Já tem uma conta? Entre agora!</StyledLink>
         </Container>
     )
 }
