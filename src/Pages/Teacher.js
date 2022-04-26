@@ -1,36 +1,82 @@
 import React, { useEffect, useState } from 'react';
 import styled from "styled-components";
+import { useNavigate } from 'react-router-dom';
+import useAuth from '../hooks/useAuth';
 import api from '../services/api';
+import Swal from 'sweetalert2';
 
 
 export default function Term(){
-
   const [tests, setTests] = useState([]);
-  
-  
-  function renderTests(teacherId){
-    const promise = api.getTestsByTeacher(teacherId);
-    promise.then((res) => {
-        setTests(res.data)
-        
-    })
-      .catch((err) => console.log(err));
-  }
+  const [teachers, setTeachers] = useState([]);
 
-  useEffect(renderTests, [tests, setTests])
+  const navigate = useNavigate();
+  const { auth } = useAuth();
+  const token = auth;
+
+  async function renderTests(teacherId){
+    try{
+      const result = await api.getTestsByTeacher(token, teacherId);
+      setTests(result.data)
+          
+    }catch (error) {
+      let errorMessage = (String(error));
+      console.log(errorMessage)
+        if(errorMessage.includes(409)){
+          return Swal.fire({
+            icon: 'error',
+            title: 'Ops...',
+            text: 'O usuário não foi encontrado!',
+          })
+        }else if(errorMessage.includes(500)){
+          return Swal.fire({
+            icon: 'error',
+            title: 'Ops...',
+            text: 'Tente logar novamente!',
+          })
+        }
+        
+    }
+  };
+
+  useEffect( () =>{ async function renderTeachers(){
+        try{
+        const result = await api.getTeachers(token);
+        setTeachers(result.data)
+          
+        }catch (error) {
+          let errorMessage = (String(error));
+          console.log(errorMessage)
+            if(errorMessage.includes(409)){
+              return Swal.fire({
+                icon: 'error',
+                title: 'Ops...',
+                text: 'O usuário não foi encontrado!',
+              });
+            }else if(errorMessage.includes(500)){
+              return Swal.fire({
+                icon: 'error',
+                title: 'Ops...',
+                text: 'Tente logar novamente!',
+              });
+            };
+        
+          };
+  };
+      // eslint-disable-next-line
+   renderTeachers();} , [])
 
     return (
         <Container>
           
           <PageTitle>
             <h1>PROVAS POR PROFESSOR</h1>
+            <StyledButton onClick={()=>navigate('/term')}>Ver provas por PERÍODO</StyledButton>
           </PageTitle>
           <Menu>
-            <StyledButton onClick={() => renderTests(1)}>PROVAS DO PEDRÃO</StyledButton>
-            <StyledButton onClick={() => renderTests(2)}>PROVAS DA BRUNINHA</StyledButton>
-            <StyledButton onClick={() => renderTests(4)}>PROVAS DO LEANDRO</StyledButton>
-            <StyledButton onClick={() => renderTests(8)}>PROVAS DO PROFFISICA1</StyledButton>
-            <StyledButton onClick={() => renderTests(9)}>PROVAS DO PROFFISICA2</StyledButton>
+            {teachers.map((teacher, index) =>
+              <StyledButton key={index} onClick={() => renderTests(`${teacher.id}`)}>{teacher.name}</StyledButton>
+            )}
           </Menu>
           {
           tests?.length === 0 ? <Test>NÃO HÁ PROVAS DESSE PROFESSOR</Test> :
@@ -62,6 +108,7 @@ const Container = styled.div`
   height: 100vh;
 `
 const PageTitle = styled.div`
+  width: 100vw;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -69,8 +116,14 @@ const PageTitle = styled.div`
   h1{
     font-family: Arial, Helvetica, sans-serif;
     margin: 30px 0 30px 0;
-    font-size: 2.5em;
+    font-size: 2em;
     color: #AEFEFF;
+  }
+
+  button{
+    width: auto;
+    font-size: 15px;
+    margin-left: 20px;
   }
 `
 
@@ -88,6 +141,7 @@ const StyledButton = styled.button`
   height: 4em;
   background-color: #35858B;
   border: 2px solid #AEFEFF;
+  border-radius: 15px;
   color:#AEFEFF;
 
   :hover{
@@ -106,11 +160,12 @@ const Test = styled.div`
   width: 30em;
   padding: 15px;
   border: 2px solid #AEFEFF;
-  border-radius: 22px;
+  border-radius: 15px;
   margin: 20px 0 10px 0;
   background-color: #35858B;
   text-align: center;
   color:  #AEFEFF;
+  font-family: Arial, Helvetica, sans-serif;
 
   p:first-child { 
     font-weight: 700;
@@ -125,7 +180,3 @@ const Test = styled.div`
     color: #AEFEFF;
   }
 `
-
-
-
- 

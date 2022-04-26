@@ -1,37 +1,83 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from "styled-components";
+import useAuth from '../hooks/useAuth';
 import api from '../services/api';
+import Swal from 'sweetalert2';
 
 
 export default function Term(){
 
   const [tests, setTests] = useState([]);
-  
-  function renderTests(termId){
-    const promise = api.getTestsByTerm(termId);
-    promise.then((res) => {
-        setTests(res.data)
-        
-    })
-      .catch((err) => console.log(err));
-  }
+  const [terms, setTerms] = useState([]);
 
-  console.log(tests)
-    
-  useEffect(renderTests, [tests, setTests])
+  const navigate = useNavigate();
+  const { auth } = useAuth();
+  const token = auth;
+
+  async function renderTests(termId){
+    try{
+      const result = await api.getTestsByTerm(token, termId);
+      setTests(result.data)
+          
+    }catch (error) {
+      let errorMessage = (String(error));
+      console.log(errorMessage)
+        if(errorMessage.includes(409)){
+          return Swal.fire({
+            icon: 'error',
+            title: 'Ops...',
+            text: 'O usuário não foi encontrado!',
+          })
+        }else if(errorMessage.includes(500)){
+          return Swal.fire({
+            icon: 'error',
+            title: 'Ops...',
+            text: 'Tente logar novamente!',
+          })
+        }
+    }
+  };
+
+  useEffect( () =>{ async function renderTerms(){
+      try{
+        const result = await api.getTerms(token);
+        setTerms(result.data)
+          
+      }catch (error) {
+        let errorMessage = (String(error));
+        console.log(errorMessage)
+          if(errorMessage.includes(409)){
+            return Swal.fire({
+              icon: 'error',
+              title: 'Ops...',
+              text: 'O usuário não foi encontrado!',
+            });
+          }else if(errorMessage.includes(500)){
+            return Swal.fire({
+              icon: 'error',
+              title: 'Ops...',
+              text: 'Tente logar novamente!',
+            });
+          } 
+        
+      }
+      }
+ // eslint-disable-next-line
+   renderTerms();} , [])
 
     return (
         <Container>
           
           <PageTitle>
             <h1>PROVAS POR PERÍODO</h1>
+            <StyledButton onClick={()=>navigate('/teacher')}>Ver provas por PROFESSOR</StyledButton>
           </PageTitle>
+
           <Menu>
-            <StyledButton onClick={() => renderTests(1)}>PROVAS DO 1º PERIODO</StyledButton>
-            <StyledButton onClick={() => renderTests(2)}>PROVAS DO 2º PERIODO</StyledButton>
-            <StyledButton onClick={() => renderTests(3)}>PROVAS DO 3º PERIODO</StyledButton>
-            <StyledButton onClick={() => renderTests(4)}>PROVAS DO 4º PERIODO</StyledButton>
-            <StyledButton onClick={() => renderTests(5)}>PROVAS DO 5º PERIODO</StyledButton>
+            {terms.map((term, index) =>
+              <StyledButton key={index} onClick={() => renderTests(`${term.id}`)}>{term.number}° PERÍODO</StyledButton>
+            )}
           </Menu>
           {
           tests?.length === 0 ? <Test>NÃO HÁ PROVAS DESSE PERÍODO</Test> :
@@ -44,7 +90,7 @@ export default function Term(){
                 <p>{test.name}</p> 
                 <p><a href={`${test.pdfUrl}`}> LINK DA PROVA </a></p>
                 <p>Disciplina: {test.teacherDiscipline.discipline.name}</p>
-                <p>Período: {test.teacherDiscipline.discipline.term.number}</p>
+                <p>Período: {test.teacherDiscipline.discipline.term.number}°</p>
                 <p>Ano: {test.year}</p>
                 <p>Professor: {test.teacherDiscipline.teacher.name}</p>
               </Test>
@@ -63,6 +109,7 @@ const Container = styled.div`
   height: 100vh;
 `
 const PageTitle = styled.div`
+  width: 100vw;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -70,8 +117,14 @@ const PageTitle = styled.div`
   h1{
     font-family: Arial, Helvetica, sans-serif;
     margin: 30px 0 30px 0;
-    font-size: 2.5em;
+    font-size: 2em;
     color: #AEFEFF;
+  }
+
+  button{
+    width: auto;
+    font-size: 15px;
+    margin-left: 20px;
   }
 `
 
@@ -89,6 +142,7 @@ const StyledButton = styled.button`
   height: 4em;
   background-color: #35858B;
   border: 2px solid #AEFEFF;
+  border-radius: 15px;
   color:#AEFEFF;
 
   :hover{
@@ -107,11 +161,12 @@ const Test = styled.div`
   width: 30em;
   padding: 15px;
   border: 2px solid #AEFEFF;
-  border-radius: 22px;
+  border-radius: 15px;
   margin: 20px 0 10px 0;
   background-color: #35858B;
   text-align: center;
   color:  #AEFEFF;
+  font-family: Arial, Helvetica, sans-serif;
 
   p:first-child { 
     font-weight: 700;
